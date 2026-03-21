@@ -8,7 +8,7 @@ describe('user-configuration', () => {
 
     it('should transform an empty config', () => {
         jsonTester({
-            userConfigMajorVersion: 13,
+            userConfigMajorVersion: 14,
             userConfigMinorVersion: 0,
             userConfigPatchVersion: 0,
             lastSaveAgentTag: '',
@@ -40,9 +40,13 @@ describe('user-configuration', () => {
             secondaryRoleAdvancedStrategyDoubletapTimeout: 200,
             secondaryRoleAdvancedStrategyTimeout: 350,
             secondaryRoleAdvancedStrategySafetyMargin: 50,
-            secondaryRoleAdvancedStrategyTriggerByRelease: true,
+            secondaryRoleAdvancedStrategyTrigger: 'Release',
             secondaryRoleAdvancedStrategyDoubletapToPrimary: true,
             secondaryRoleAdvancedStrategyTimeoutAction: 'Secondary',
+            secondaryRoleAdvancedStrategyTriggerByMouse: false,
+            secondaryRoleAdvancedStrategyTriggerFromSameHalf: true,
+            secondaryRoleAdvancedStrategyMinimumHoldTime: 0,
+            secondaryRoleAdvancedStrategyTimeoutType: 'Active',
             mouseScrollAxisSkew: 1,
             mouseMoveAxisSkew: 1,
             diagonalSpeedCompensation: false,

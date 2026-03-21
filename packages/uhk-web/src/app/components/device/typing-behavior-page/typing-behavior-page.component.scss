@@ -7,6 +7,12 @@
                 td:not([colspan='2']):first-of-type {
                     width: 35%;
                 }
+
+                td {
+                    .form-check-label {
+                        min-width: 70px;
+                    }
+                }
             }
         }
     }

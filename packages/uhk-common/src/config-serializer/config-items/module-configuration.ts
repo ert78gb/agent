@@ -96,6 +96,7 @@ export class ModuleConfiguration {
             case 11:
             case 12:
             case 13:
+            case 14:
                 this.fromJsonObjectV7(jsonObject);
                 break;
 
@@ -122,6 +123,7 @@ export class ModuleConfiguration {
             case 11:
             case 12:
             case 13:
+            case 14:
                 this.fromBinaryV7(buffer);
                 break;
 

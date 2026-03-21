@@ -23,6 +23,8 @@ import { RgbColor } from './rgb-color.js';
 import { isAllowedScancode } from './scancode-checker.js';
 import { SecondaryRoleAction } from './secondary-role-action.js';
 import { SecondaryRoleAdvancedStrategyTimeoutAction } from './secondary-role-advanced-strategy-timeout-action.js';
+import { SecondaryRoleAdvancedStrategyTimeoutType } from './secondary-role-advanced-strategy-timeout-type.js';
+import { SecondaryRoleAdvancedStrategyTriggeringEvent } from './secondary-role-advanced-strategy-triggering-event.js';
 import { SecondaryRoleStrategy } from './secondary-role-strategy.js';
 import { isSerialisationInfoGte, SerialisationInfo } from './serialisation-info.js';
 
@@ -137,11 +139,26 @@ export class UserConfiguration implements MouseSpeedConfiguration {
 
     @assertInt16 secondaryRoleAdvancedStrategySafetyMargin: number;
 
+    /**
+     * Deprecated in version 14.
+     * Use
+     * - `secondaryRoleAdvancedStrategyTrigger`
+     */
     secondaryRoleAdvancedStrategyTriggerByRelease: boolean;
+
+    @assertEnum(SecondaryRoleAdvancedStrategyTriggeringEvent) secondaryRoleAdvancedStrategyTrigger: SecondaryRoleAdvancedStrategyTriggeringEvent;
 
     secondaryRoleAdvancedStrategyDoubletapToPrimary: boolean;
 
     @assertEnum(SecondaryRoleAdvancedStrategyTimeoutAction) secondaryRoleAdvancedStrategyTimeoutAction: SecondaryRoleAdvancedStrategyTimeoutAction;
+
+    secondaryRoleAdvancedStrategyTriggerByMouse: boolean;
+
+    secondaryRoleAdvancedStrategyTriggerFromSameHalf: boolean;
+
+    @assertUInt8 secondaryRoleAdvancedStrategyMinimumHoldTime: number;
+
+    @assertEnum(SecondaryRoleAdvancedStrategyTimeoutType) secondaryRoleAdvancedStrategyTimeoutType: SecondaryRoleAdvancedStrategyTimeoutType;
 
     @assertFloat mouseScrollAxisSkew: number;
 
@@ -205,6 +222,7 @@ export class UserConfiguration implements MouseSpeedConfiguration {
             case 11:
             case 12:
             case 13:
+            case 14:
                 this.fromJsonObjectV9(jsonObject);
                 break;
 
@@ -228,6 +246,7 @@ export class UserConfiguration implements MouseSpeedConfiguration {
         this.migrateToV12();
         this.migrateToV12_1();
         this.migrateToV13();
+        this.migrateToV14();
 
         this.recalculateConfigurationLength();
 
@@ -264,6 +283,7 @@ export class UserConfiguration implements MouseSpeedConfiguration {
             case 11:
             case 12:
             case 13:
+            case 14:
                 this.fromBinaryV9(buffer);
                 break;
 
@@ -332,6 +352,10 @@ export class UserConfiguration implements MouseSpeedConfiguration {
             this.userConfigurationLength = 0;
         }
 
+        if (this.migrateToV14()) {
+            this.userConfigurationLength = 0;
+        }
+
         if (this.userConfigurationLength === 0) {
             this.recalculateConfigurationLength();
         }
@@ -373,9 +397,13 @@ export class UserConfiguration implements MouseSpeedConfiguration {
             secondaryRoleAdvancedStrategyDoubletapTimeout: this.secondaryRoleAdvancedStrategyDoubletapTimeout,
             secondaryRoleAdvancedStrategyTimeout: this.secondaryRoleAdvancedStrategyTimeout,
             secondaryRoleAdvancedStrategySafetyMargin: this.secondaryRoleAdvancedStrategySafetyMargin,
-            secondaryRoleAdvancedStrategyTriggerByRelease: this.secondaryRoleAdvancedStrategyTriggerByRelease,
+            secondaryRoleAdvancedStrategyTrigger: SecondaryRoleAdvancedStrategyTriggeringEvent[this.secondaryRoleAdvancedStrategyTrigger],
             secondaryRoleAdvancedStrategyDoubletapToPrimary: this.secondaryRoleAdvancedStrategyDoubletapToPrimary,
             secondaryRoleAdvancedStrategyTimeoutAction: SecondaryRoleAdvancedStrategyTimeoutAction[this.secondaryRoleAdvancedStrategyTimeoutAction],
+            secondaryRoleAdvancedStrategyTriggerByMouse: this.secondaryRoleAdvancedStrategyTriggerByMouse,
+            secondaryRoleAdvancedStrategyTriggerFromSameHalf: this.secondaryRoleAdvancedStrategyTriggerFromSameHalf,
+            secondaryRoleAdvancedStrategyMinimumHoldTime: this.secondaryRoleAdvancedStrategyMinimumHoldTime,
+            secondaryRoleAdvancedStrategyTimeoutType: SecondaryRoleAdvancedStrategyTimeoutType[this.secondaryRoleAdvancedStrategyTimeoutType],
             mouseScrollAxisSkew: this.mouseScrollAxisSkew,
             mouseMoveAxisSkew: this.mouseMoveAxisSkew,
             diagonalSpeedCompensation: this.diagonalSpeedCompensation,
@@ -434,7 +462,7 @@ export class UserConfiguration implements MouseSpeedConfiguration {
         buffer.writeUInt16(this.secondaryRoleAdvancedStrategyDoubletapTimeout);
         buffer.writeUInt16(this.secondaryRoleAdvancedStrategyTimeout);
         buffer.writeInt16(this.secondaryRoleAdvancedStrategySafetyMargin);
-        buffer.writeBoolean(this.secondaryRoleAdvancedStrategyTriggerByRelease);
+        buffer.writeUInt8(this.secondaryRoleAdvancedStrategyTrigger);
         buffer.writeBoolean(this.secondaryRoleAdvancedStrategyDoubletapToPrimary);
         buffer.writeUInt8(this.secondaryRoleAdvancedStrategyTimeoutAction);
         buffer.writeFloat(this.mouseScrollAxisSkew);
@@ -454,6 +482,10 @@ export class UserConfiguration implements MouseSpeedConfiguration {
 
         buffer.writeUInt8(this.keyBacklightBrightnessChargingDefault);
         buffer.writeUInt8(this.batteryChargingMode);
+        buffer.writeBoolean(this.secondaryRoleAdvancedStrategyTriggerByMouse);
+        buffer.writeBoolean(this.secondaryRoleAdvancedStrategyTriggerFromSameHalf);
+        buffer.writeUInt8(this.secondaryRoleAdvancedStrategyMinimumHoldTime);
+        buffer.writeUInt8(this.secondaryRoleAdvancedStrategyTimeoutType);
 
         for(let i = 0; i < HOST_CONNECTION_COUNT_MAX; i++) {
             const hostConnection = this.hostConnections[i];
@@ -743,6 +775,9 @@ export class UserConfiguration implements MouseSpeedConfiguration {
         this.setDefaultDeviceName();
         this.doubleTapSwitchLayerTimeout = buffer.readUInt16();
         this.perKeyRgbPresent = buffer.readBoolean();
+
+        const serialisationInfo = this.getSerialisationInfo();
+
         this.backlightingMode = buffer.readUInt8();
         this.backlightingNoneActionColor = new RgbColor().fromBinary(buffer, this.userConfigMajorVersion);
         this.backlightingScancodeColor = new RgbColor().fromBinary(buffer, this.userConfigMajorVersion);
@@ -768,7 +803,14 @@ export class UserConfiguration implements MouseSpeedConfiguration {
         this.secondaryRoleAdvancedStrategyDoubletapTimeout = buffer.readUInt16();
         this.secondaryRoleAdvancedStrategyTimeout = buffer.readUInt16();
         this.secondaryRoleAdvancedStrategySafetyMargin = buffer.readInt16();
-        this.secondaryRoleAdvancedStrategyTriggerByRelease = buffer.readBoolean();
+
+        if (isSerialisationInfoGte(serialisationInfo, '14.0.0')) {
+            this.secondaryRoleAdvancedStrategyTrigger = buffer.readUInt8();
+        }
+        else {
+            this.secondaryRoleAdvancedStrategyTriggerByRelease = buffer.readBoolean();
+        }
+
         this.secondaryRoleAdvancedStrategyDoubletapToPrimary = buffer.readBoolean();
         this.secondaryRoleAdvancedStrategyTimeoutAction = buffer.readUInt8();
         this.mouseScrollAxisSkew = buffer.readFloat();
@@ -786,11 +828,16 @@ export class UserConfiguration implements MouseSpeedConfiguration {
         this.keyBacklightFadeOutTimeout = buffer.readUInt16();
         this.keyBacklightFadeOutBatteryTimeout = buffer.readUInt16();
 
-        const serialisationInfo = this.getSerialisationInfo();
-
         if (isSerialisationInfoGte(serialisationInfo, '9.99.0')) {
             this.keyBacklightBrightnessChargingDefault = buffer.readUInt8();
             this.batteryChargingMode = buffer.readUInt8();
+        }
+
+        if (isSerialisationInfoGte(serialisationInfo, '14.0.0')) {
+            this.secondaryRoleAdvancedStrategyTriggerByMouse = buffer.readBoolean();
+            this.secondaryRoleAdvancedStrategyTriggerFromSameHalf = buffer.readBoolean();
+            this.secondaryRoleAdvancedStrategyMinimumHoldTime = buffer.readUInt8();
+            this.secondaryRoleAdvancedStrategyTimeoutType = buffer.readUInt8();
         }
 
         this.hostConnections = [];
@@ -1024,6 +1071,9 @@ export class UserConfiguration implements MouseSpeedConfiguration {
         this.setDefaultDeviceName();
         this.doubleTapSwitchLayerTimeout = jsonObject.doubleTapSwitchLayerTimeout;
         this.perKeyRgbPresent = jsonObject.perKeyRgbPresent;
+
+        const serialisationInfo = this.getSerialisationInfo();
+
         this.backlightingMode = BacklightingMode[jsonObject.backlightingMode as string];
         this.backlightingNoneActionColor = new RgbColor().fromJsonObject(jsonObject.backlightingNoneActionColor, this.userConfigMajorVersion);
         this.backlightingScancodeColor = new RgbColor().fromJsonObject(jsonObject.backlightingScancodeColor, this.userConfigMajorVersion);
@@ -1058,6 +1108,14 @@ export class UserConfiguration implements MouseSpeedConfiguration {
         this.doubletapTimeout = jsonObject.doubletapTimeout;
         this.keystrokeDelay = jsonObject.keystrokeDelay;
 
+        if (isSerialisationInfoGte(serialisationInfo, '14.0.0')) {
+            this.secondaryRoleAdvancedStrategyTrigger = SecondaryRoleAdvancedStrategyTriggeringEvent[jsonObject.secondaryRoleAdvancedStrategyTrigger as string];
+            this.secondaryRoleAdvancedStrategyTriggerByMouse = jsonObject.secondaryRoleAdvancedStrategyTriggerByMouse;
+            this.secondaryRoleAdvancedStrategyTriggerFromSameHalf = jsonObject.secondaryRoleAdvancedStrategyTriggerFromSameHalf;
+            this.secondaryRoleAdvancedStrategyMinimumHoldTime = jsonObject.secondaryRoleAdvancedStrategyMinimumHoldTime;
+            this.secondaryRoleAdvancedStrategyTimeoutType = SecondaryRoleAdvancedStrategyTimeoutType[jsonObject.secondaryRoleAdvancedStrategyTimeoutType as string];
+        }
+
         this.displayBrightness = jsonObject.displayBrightness;
         this.displayBrightnessBattery = jsonObject.displayBrightnessBattery;
         this.keyBacklightBrightness = jsonObject.keyBacklightBrightness;
@@ -1066,8 +1124,6 @@ export class UserConfiguration implements MouseSpeedConfiguration {
         this.displayFadeOutBatteryTimeout = jsonObject.displayFadeOutBatteryTimeout;
         this.keyBacklightFadeOutTimeout = jsonObject.keyBacklightFadeOutTimeout;
         this.keyBacklightFadeOutBatteryTimeout = jsonObject.keyBacklightFadeOutBatteryTimeout;
-
-        const serialisationInfo = this.getSerialisationInfo();
 
         if (isSerialisationInfoGte(serialisationInfo, '9.99.0')) {
             this.keyBacklightBrightnessChargingDefault = jsonObject.keyBacklightBrightnessChargingDefault;
@@ -1421,6 +1477,27 @@ export class UserConfiguration implements MouseSpeedConfiguration {
         // We don't know it. We will update it before save user config to the keyboard
         this.lastSaveAgentTag = '';
         this.lastSaveFirmwareTag = '';
+    }
+
+    private migrateToV14(): boolean {
+        if (this.userConfigMajorVersion > 13) {
+            return false;
+        }
+
+        this.userConfigMajorVersion = 14;
+        this.userConfigMinorVersion = 0;
+        this.userConfigPatchVersion = 0;
+
+        if (this.secondaryRoleAdvancedStrategyTriggerByRelease) {
+            this.secondaryRoleAdvancedStrategyTrigger = SecondaryRoleAdvancedStrategyTriggeringEvent.Release;
+        }
+        else {
+            this.secondaryRoleAdvancedStrategyTrigger = SecondaryRoleAdvancedStrategyTriggeringEvent.Press;
+        }
+        this.secondaryRoleAdvancedStrategyTriggerByMouse = false;
+        this.secondaryRoleAdvancedStrategyTriggerFromSameHalf = true;
+        this.secondaryRoleAdvancedStrategyMinimumHoldTime = 0;
+        this.secondaryRoleAdvancedStrategyTimeoutType = SecondaryRoleAdvancedStrategyTimeoutType.Active;
     }
 
     private getSerialisationInfo(): SerialisationInfo {
