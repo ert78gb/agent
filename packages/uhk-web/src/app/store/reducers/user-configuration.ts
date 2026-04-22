@@ -1,7 +1,14 @@
+import { isEqual } from 'lodash';
+
 import {
+    AdvancedSecondaryRoleConfiguration,
+    ADVANCED_SECONDARY_ROLE_CONFIGURATION_FIELD_NAMES,
+    ADVANCED_SECONDARY_ROLE_CONFIGURATION_FIELD_SET,
+    BUILTIN_ADVANCED_SECONDARY_ROLE_CONFIGURATION_PRESETS,
     BacklightingMode,
     ConnectionsAction,
     Constants,
+    CUSTOM_ADVANCED_SECONDARY_ROLE_CONFIGURATION_PRESET_NAME,
     emptyHostConnection,
     getDefaultHalvesInfo,
     HalvesInfo,
@@ -27,6 +34,8 @@ import {
     RgbColor,
     RgbColorInterface,
     RightSlotModules,
+    SecondaryRoleStrategy,
+    SIMPLE_ADVANCED_SECONDARY_ROLE_CONFIGURATION_PRESET_NAME,
     SwitchKeymapAction,
     SwitchLayerAction,
     UserConfiguration
@@ -43,6 +52,7 @@ import {
     OpenPopoverModel,
     SelectedMacroAction
 } from '../../models';
+import { TypingBehaviorPreset } from '../../models/typing-behavior-preset';
 import { getDefaultMacMouseSpeeds, getDefaultPcMouseSpeeds } from '../../services/default-mouse-speeds';
 import {
     findModuleById,
@@ -79,6 +89,8 @@ export interface State {
     newerUserConfiguration?: NewerUserConfiguration;
     selectedLayerOption: LayerOption;
     theme: string;
+    customAdvancedSecondaryRoleConfiguration?: AdvancedSecondaryRoleConfiguration;
+    isCustomPresetTheLastLoadedPreset: boolean;
 }
 
 export const initialState: State = {
@@ -92,7 +104,8 @@ export const initialState: State = {
     newPairedDevices: [],
     newPairedDevicesAdding: false,
     selectedLayerOption: getBaseLayerOption(),
-    theme: ''
+    theme: '',
+    isCustomPresetTheLastLoadedPreset: false,
 };
 
 export function reducer(
@@ -155,6 +168,8 @@ export function reducer(
             newState.newerUserConfiguration = undefined;
             newState.selectedKeymapAbbr = undefined;
             newState.layerOptions = calculateLayerOptions(newState);
+            newState.customAdvancedSecondaryRoleConfiguration = undefined;
+            newState.isCustomPresetTheLastLoadedPreset = false;
 
             return newState;
         }
@@ -877,6 +892,53 @@ export function reducer(
             };
         }
 
+        case UserConfig.ActionTypes.LoadTypingBehaviorPreset: {
+            const payload = (action as UserConfig.LoadTypingBehaviorPresetAction).payload;
+
+            // Currently, we don't have custom saved preset in memory
+            if (payload === CUSTOM_ADVANCED_SECONDARY_ROLE_CONFIGURATION_PRESET_NAME && !state.customAdvancedSecondaryRoleConfiguration) {
+                return {
+                    ...state,
+                    isCustomPresetTheLastLoadedPreset: true,
+                }
+            }
+
+            if (payload === CUSTOM_ADVANCED_SECONDARY_ROLE_CONFIGURATION_PRESET_NAME && state.isCustomPresetTheLastLoadedPreset) {
+                return state
+            }
+
+            const newState = {
+                ...state,
+            }
+            const userConfiguration: UserConfiguration = Object.assign(new UserConfiguration(), state.userConfiguration);
+            newState.userConfiguration = userConfiguration;
+            let presetConfiguration: AdvancedSecondaryRoleConfiguration;
+
+            if (payload === CUSTOM_ADVANCED_SECONDARY_ROLE_CONFIGURATION_PRESET_NAME) {
+                presetConfiguration = state.customAdvancedSecondaryRoleConfiguration;
+                userConfiguration.secondaryRoleStrategy = SecondaryRoleStrategy.Advanced;
+                newState.isCustomPresetTheLastLoadedPreset = true;
+            }
+            else {
+                const preset = BUILTIN_ADVANCED_SECONDARY_ROLE_CONFIGURATION_PRESETS.find((preset) => preset.name === payload)
+                presetConfiguration = preset.configuration;
+                userConfiguration.secondaryRoleStrategy = preset.strategy;
+                newState.isCustomPresetTheLastLoadedPreset = false;
+            }
+
+            const customAdvancedSecondaryRoleConfiguration = {} as AdvancedSecondaryRoleConfiguration;
+            newState.customAdvancedSecondaryRoleConfiguration = customAdvancedSecondaryRoleConfiguration;
+
+            for (const fieldName of ADVANCED_SECONDARY_ROLE_CONFIGURATION_FIELD_NAMES) {
+                // Save the old typings behavior config
+                (customAdvancedSecondaryRoleConfiguration[fieldName] as any) = userConfiguration[fieldName];
+                // Apply the loaded typings behavior config
+                (userConfiguration[fieldName] as any) = presetConfiguration[fieldName];
+            }
+
+            return newState
+        }
+
         case UserConfig.ActionTypes.RenameUserConfiguration: {
             const payload = (action as UserConfig.RenameUserConfigurationAction).payload;
 
@@ -1031,6 +1093,10 @@ export function reducer(
                     userConfiguration.perKeyRgbPresent = true;
                 }
                 setSvgKeyboardCoverColorsOfAllLayer(userConfiguration, state.theme);
+            }
+
+            if (ADVANCED_SECONDARY_ROLE_CONFIGURATION_FIELD_SET.has(payload.propertyName as keyof AdvancedSecondaryRoleConfiguration)) {
+                userConfiguration.secondaryRoleStrategy = SecondaryRoleStrategy.Advanced;
             }
 
             return {
@@ -1259,6 +1325,56 @@ export const backlightingColorPalette = (state: State): Array<RgbColorInterface>
 export const isBacklightingColoring = (state: State): boolean => state.selectedBacklightingColorIndex > -1;
 export const selectedBacklightingColor = (state: State): RgbColorInterface => state.backlightingColorPalette[state.selectedBacklightingColorIndex];
 export const selectedBacklightingColorIndex = (state: State): number => state.selectedBacklightingColorIndex;
+export const calculateTypingBehaviorPresets = (state: State): TypingBehaviorPreset[] => {
+    const currentConfiguration = ADVANCED_SECONDARY_ROLE_CONFIGURATION_FIELD_NAMES.reduce((config, fieldName) => {
+        (config[fieldName] as any) = state.userConfiguration[fieldName];
+
+        return config;
+    }, {} as AdvancedSecondaryRoleConfiguration)
+
+    let hasMatches = false;
+
+    const result: TypingBehaviorPreset[] =  BUILTIN_ADVANCED_SECONDARY_ROLE_CONFIGURATION_PRESETS.map(preset => {
+        if (preset.name === SIMPLE_ADVANCED_SECONDARY_ROLE_CONFIGURATION_PRESET_NAME) {
+            hasMatches = state.userConfiguration.secondaryRoleStrategy === SecondaryRoleStrategy.Simple;
+
+            return {
+                ...preset,
+                selected: hasMatches,
+            }
+        }
+
+        if (state.userConfiguration.secondaryRoleStrategy === SecondaryRoleStrategy.Simple) {
+            return {
+                ...preset,
+                selected: false,
+            }
+        }
+
+
+        if (!state.isCustomPresetTheLastLoadedPreset && isEqual(preset.configuration, currentConfiguration)) {
+            hasMatches = true;
+            return {
+                ...preset,
+                selected: true,
+            }
+        }
+
+        return {
+            ...preset,
+            selected: false,
+        }
+    })
+
+    result.push({
+        name: CUSTOM_ADVANCED_SECONDARY_ROLE_CONFIGURATION_PRESET_NAME,
+        strategy: SecondaryRoleStrategy.Advanced,
+        configuration: currentConfiguration,
+        selected: !hasMatches,
+    })
+
+    return result
+}
 
 function generateAbbr(keymaps: Keymap[], abbr: string): string {
     const chars: string[] = '23456789ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');

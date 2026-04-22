@@ -1,6 +1,7 @@
 import { assertEnum, assertFloat, assertInt16, assertUInt16, assertUInt32, assertUInt8 } from '../assert.js';
 import { ConfigSerializer } from '../config-serializer.js';
 import { UhkBuffer } from '../uhk-buffer.js';
+import { AdvancedSecondaryRoleConfiguration } from './advanced-secondary-role-configuration.js';
 import { BacklightingMode } from './backlighting-mode.js';
 import { BatteryChargingMode } from './battery-charging-mode.js';
 import {
@@ -28,7 +29,7 @@ import { SecondaryRoleAdvancedStrategyTriggeringEvent } from './secondary-role-a
 import { SecondaryRoleStrategy } from './secondary-role-strategy.js';
 import { isSerialisationInfoGte, SerialisationInfo } from './serialisation-info.js';
 
-export class UserConfiguration implements MouseSpeedConfiguration {
+export class UserConfiguration implements AdvancedSecondaryRoleConfiguration, MouseSpeedConfiguration {
 
     @assertUInt16 userConfigMajorVersion: number;
 
@@ -133,6 +134,10 @@ export class UserConfiguration implements MouseSpeedConfiguration {
 
     @assertEnum(SecondaryRoleStrategy) secondaryRoleStrategy: SecondaryRoleStrategy;
 
+    /**
+     * Deprecated in version 14.
+     * Functionality consolidated with `doubletapTimeout`
+     */
     @assertUInt16 secondaryRoleAdvancedStrategyDoubletapTimeout: number;
 
     @assertUInt16 secondaryRoleAdvancedStrategyTimeout: number;

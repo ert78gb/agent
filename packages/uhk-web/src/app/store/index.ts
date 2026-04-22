@@ -172,6 +172,7 @@ export const backlightingColorPalette = createSelector(userConfigState, fromUser
 export const isBacklightingColoring = createSelector(userConfigState, fromUserConfig.isBacklightingColoring);
 export const selectedBacklightingColor = createSelector(userConfigState, fromUserConfig.selectedBacklightingColor);
 export const selectedBacklightingColorIndex = createSelector(userConfigState, fromUserConfig.selectedBacklightingColorIndex);
+export const calculateTypingBehaviorPresets = createSelector(userConfigState, fromUserConfig.calculateTypingBehaviorPresets);
 export const getKeymapOptions = createSelector(getKeymaps, (keymaps): SelectOptionData[] => {
     return keymaps.map(keymap => {
         return {

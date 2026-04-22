@@ -117,6 +117,7 @@ export class UserConfigEffects {
                 ActionTypes.RenameUserConfiguration, ActionTypes.SetUserConfigurationValue, ActionTypes.SetUserConfigurationRgbValue,
                 ActionTypes.RecoverLEDSpaces, ActionTypes.SetModuleConfigurationValue,
                 ActionTypes.ReorderHostConnections, ActionTypes.RenameHostConnection, ActionTypes.SetHostConnectionSwitchover,
+                ActionTypes.LoadTypingBehaviorPreset,
             ),
             withLatestFrom(this.store.select(getUserConfiguration), this.store.select(getPrevUserConfiguration), this.store.select(getConnectedDevice)),
             mergeMap(([action, config, prevUserConfiguration, uhkDeviceProduct]) => {
