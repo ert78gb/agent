@@ -60,7 +60,9 @@ export class SliderWrapperComponent implements ControlValueAccessor, OnDestroy {
     }
 
     writeValue(value: number): void {
-        this.value = value || this.min;
+        this.value = value === undefined || value === null
+            ? this.min
+            : value;
     }
 
     registerOnChange(fn: any): void {
