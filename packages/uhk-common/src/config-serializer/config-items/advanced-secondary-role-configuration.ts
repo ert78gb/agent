@@ -37,20 +37,22 @@ export interface AdvancedSecondaryRoleConfigurationPreset {
 
 export const CUSTOM_ADVANCED_SECONDARY_ROLE_CONFIGURATION_PRESET_NAME = 'Custom';
 export const HRM_ADVANCED_SECONDARY_ROLE_CONFIGURATION_PRESET_NAME = 'HRM';
+export const TIMEOUT_ADVANCED_SECONDARY_ROLE_CONFIGURATION_PRESET_NAME = 'Timeout';
 export const SIMPLE_ADVANCED_SECONDARY_ROLE_CONFIGURATION_PRESET_NAME = 'Simple';
+
 export const SIMPLE_ADVANCED_SECONDARY_ROLE_CONFIGURATION_PRESET: AdvancedSecondaryRoleConfigurationPreset = {
     name: SIMPLE_ADVANCED_SECONDARY_ROLE_CONFIGURATION_PRESET_NAME,
     strategy: SecondaryRoleStrategy.Simple,
     configuration: {
-        secondaryRoleAdvancedStrategyTimeout: 350,
+        secondaryRoleAdvancedStrategyTimeout: 1000, // TODO: Firngrod, can the timeout be disabled with the new implementation?
         secondaryRoleAdvancedStrategyMinimumHoldTime: 0,
         secondaryRoleAdvancedStrategyTimeoutAction: SecondaryRoleAdvancedStrategyTimeoutAction.Secondary,
         secondaryRoleAdvancedStrategyTimeoutType: SecondaryRoleAdvancedStrategyTimeoutType.Active,
-        secondaryRoleAdvancedStrategyTrigger: SecondaryRoleAdvancedStrategyTriggeringEvent.Release,
-        secondaryRoleAdvancedStrategySafetyMargin: 50,
-        secondaryRoleAdvancedStrategyDoubletapToPrimary: true,
-        secondaryRoleAdvancedStrategyTriggerByMouse: false,
-        secondaryRoleAdvancedStrategyTriggerFromSameHalf: true,
+        secondaryRoleAdvancedStrategyTrigger: SecondaryRoleAdvancedStrategyTriggeringEvent.Press,
+        secondaryRoleAdvancedStrategySafetyMargin: 0,
+        secondaryRoleAdvancedStrategyDoubletapToPrimary: false,
+        secondaryRoleAdvancedStrategyTriggerByMouse: true,
+        secondaryRoleAdvancedStrategyTriggerFromSameHalf: false,
     }
 }
 
@@ -59,7 +61,7 @@ export const HRM_ADVANCED_SECONDARY_ROLE_CONFIGURATION_PRESET: AdvancedSecondary
     strategy: SecondaryRoleStrategy.Advanced,
     configuration: {
         secondaryRoleAdvancedStrategyTimeout: 300,
-        secondaryRoleAdvancedStrategyMinimumHoldTime: 0,
+        secondaryRoleAdvancedStrategyMinimumHoldTime: 150,
         secondaryRoleAdvancedStrategyTimeoutAction: SecondaryRoleAdvancedStrategyTimeoutAction.None,
         secondaryRoleAdvancedStrategyTimeoutType: SecondaryRoleAdvancedStrategyTimeoutType.Passive,
         secondaryRoleAdvancedStrategyTrigger: SecondaryRoleAdvancedStrategyTriggeringEvent.Release,
@@ -70,7 +72,25 @@ export const HRM_ADVANCED_SECONDARY_ROLE_CONFIGURATION_PRESET: AdvancedSecondary
     }
 }
 
+export const TIMEOUT_ADVANCED_SECONDARY_ROLE_CONFIGURATION_PRESET: AdvancedSecondaryRoleConfigurationPreset = {
+    name: TIMEOUT_ADVANCED_SECONDARY_ROLE_CONFIGURATION_PRESET_NAME,
+    strategy: SecondaryRoleStrategy.Advanced,
+    configuration: {
+        secondaryRoleAdvancedStrategyTimeout: 200,
+        secondaryRoleAdvancedStrategyMinimumHoldTime: 150,
+        secondaryRoleAdvancedStrategyTimeoutAction: SecondaryRoleAdvancedStrategyTimeoutAction.Secondary,
+        secondaryRoleAdvancedStrategyTimeoutType: SecondaryRoleAdvancedStrategyTimeoutType.Active,
+        secondaryRoleAdvancedStrategyTrigger: SecondaryRoleAdvancedStrategyTriggeringEvent.None,
+        secondaryRoleAdvancedStrategySafetyMargin: 0,
+        secondaryRoleAdvancedStrategyDoubletapToPrimary: true,
+        secondaryRoleAdvancedStrategyTriggerByMouse: true,
+        secondaryRoleAdvancedStrategyTriggerFromSameHalf: false,
+    }
+}
+
+
 export const BUILTIN_ADVANCED_SECONDARY_ROLE_CONFIGURATION_PRESETS: AdvancedSecondaryRoleConfigurationPreset[] = [
     SIMPLE_ADVANCED_SECONDARY_ROLE_CONFIGURATION_PRESET,
     HRM_ADVANCED_SECONDARY_ROLE_CONFIGURATION_PRESET,
+    TIMEOUT_ADVANCED_SECONDARY_ROLE_CONFIGURATION_PRESET,
 ];
