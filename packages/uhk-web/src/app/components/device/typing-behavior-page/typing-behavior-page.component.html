@@ -39,13 +39,13 @@
             <tr>
                 <td colspan="2">
                     <h5 class="fw-bold d-inline-block">Dual role key</h5>
-                    <circle-tooltip tooltip="Secondary role options that relate to the key that has a dual role assigned to it."
+                    <circle-tooltip tooltip="Secondary role settings that relate to the key that has a dual-role assigned to it."
                                     [width]="250"/>
                 </td>
             </tr>
             <tr class="separator">
                 <td>Minimum hold time
-                    <circle-tooltip tooltip="The minimum time that a dual role key must be held before it is allowed to trigger as secondary role."
+                    <circle-tooltip tooltip="The minimum time that a dual-role key must be held before it is allowed to trigger as secondary role."
                                     [width]="250"/>
                 </td>
                 <td>
@@ -61,7 +61,7 @@
             </tr>
             <tr class="separator">
                 <td>Timeout
-                    <circle-tooltip tooltip="If an (advanced strategy) dual-role key is held for at least this amount of time, the Timeout Action is activated even when there is no other activity."
+                    <circle-tooltip tooltip="If an dual-role key is held for at least this amount of time, the Timeout Action is activated even when there is no other activity."
                                     [width]="250"/>
                 </td>
                 <td>
@@ -141,7 +141,7 @@
             <tr>
                 <td colspan="2">
                     <h5 class="fw-bold d-inline-block">Trigger keys</h5>
-                    <circle-tooltip tooltip="Secondary role options that relate to the other actions that affect dual role key behavior. Usually the first key that is pressed after the dual role key has been pressed."
+                    <circle-tooltip tooltip="Secondary role settings that relate to the actions that decide the dual-role key behavior. Usually the first key that is pressed after the dual-role key has been pressed."
                                     [width]="250"/>
                 </td>
             </tr>
@@ -150,7 +150,7 @@
                     <circle-tooltip [tooltip]="triggerSafetyMarginTooltip"
                                     [width]="380"/>
                     <ng-template #triggerSafetyMarginTooltip>
-                        <p>This virtually offsets the release time of the dual-role key. Thus positive values fine-tune the dual role resolution sensitivity towards the primary role, while negative values fine-tune the dual role resolution sensitivity towards the secondary role.</p>
+                        <p>This virtually offsets the release time of the dual-role key. Thus positive values fine-tune the dual-role resolution sensitivity towards the primary role, while negative values fine-tune the dual-role resolution sensitivity towards the secondary role.</p>
                         Intended to be used with the Trigger by release option.
                     </ng-template>
                 </td>
@@ -171,7 +171,7 @@
                                     [width]="350"/>
                     <ng-template #triggeringEventTooltip>
                         <p>Press: just as with simple strategy, secondary role activated immediately when another key is pressed.</p>
-                        <p>Release: secondary role is activated when another key is released while the dual role-key is pressed. Thus the role is determined by the release order of the two keys.</p>
+                        <p>Release: secondary role is activated when another key is released while the dual-role key is pressed. Thus the role is determined by the release order of the two keys.</p>
                         None: secondary role key is triggered only by timeout.
                     </ng-template>
                 </td>
@@ -248,8 +248,8 @@
                 </td>
             </tr>
             <tr class="separator">
-                <td>Double tap to lock layer timeout
-                    <circle-tooltip tooltip="Double tap to lock layer timeout configures doubletap timeout for layer switchers, and also for the `ifDoubletap` macro condition."
+                <td>Double tap timeout
+                    <circle-tooltip tooltip="Configures the timeout for most doubletap behaviors in the firmware. (Layer switcher doubletaps, secondary role doubletaps, the `ifDoubletap` macro condition...)"
                                     [width]="250"/>
                 </td>
                 <td>
