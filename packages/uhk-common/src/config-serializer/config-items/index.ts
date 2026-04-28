@@ -1,5 +1,6 @@
 export { default as SCANCODES }  from './scancodes.js';
 
+export * from './advanced-secondary-role-configuration.js';
 export * from './backlighting-mode.js';
 export * from './battery-charging-mode.js';
 export * from './key-action/index.js';
@@ -13,6 +14,8 @@ export * from './layer.js';
 export * from './layer-name.js';
 export * from './secondary-role-action.js';
 export * from './secondary-role-advanced-strategy-timeout-action.js';
+export * from './secondary-role-advanced-strategy-timeout-type.js';
+export * from './secondary-role-advanced-strategy-triggering-event.js';
 export * from './secondary-role-strategy.js';
 export * from './macro.js';
 export * from './module.js';

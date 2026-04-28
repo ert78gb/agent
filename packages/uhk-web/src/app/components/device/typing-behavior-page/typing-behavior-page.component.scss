@@ -1,11 +1,38 @@
 :host {
     --slider-value-width: 50px;
+    --table-td-value-margin-left: 1.75em;
 
     table.settings {
         tbody {
             tr {
                 td:not([colspan='2']):first-of-type {
-                    width: 35%;
+                    width: 25%;
+                }
+
+                td {
+                    height: 45px;
+
+                    .form-check-input {
+                        margin-left: var(--table-td-value-margin-left);
+                    }
+
+                    .timeout-action-container {
+                        display: flex;
+                        align-items: center;
+                        gap: 0.5em;
+                        flex-wrap: wrap;
+                        margin-left: var(--table-td-value-margin-left);
+
+                        .timeout-action-action-container {
+                            display: inline-block;
+                            width: 115px;
+                        }
+
+                        .timeout-action-type-container {
+                            display: inline-block;
+                            width: 250px;
+                        }
+                    }
                 }
             }
         }

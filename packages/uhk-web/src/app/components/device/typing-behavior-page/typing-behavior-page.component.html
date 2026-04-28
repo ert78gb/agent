@@ -3,141 +3,122 @@
     <span>Typing behavior</span>
 </h1>
 
-<div class="row">
-    <div class="col-12 col-lg-8">
+<div class="row mb-3">
+    <div class="col-12">
+        <div class="d-flex align-items-center">
+            <h3>Secondary roles</h3>
+            <circle-tooltip class="mt-2 ms-1"
+                            [tooltip]="secondaryRolesTooltip"
+                            [width]="380"/>
+            <ng-template #secondaryRolesTooltip>
+                <p>Secondary role keys, also dual-role keys, are keys that act depending on context.</p>
+                For instance, a key may act as an escape key when tapped alone, but act as a mouse layer switcher when used with another key (which is then executed in the mouse layer).
+            </ng-template>
+        </div>
+        <div>
+            <span class="group-title me-2">Presets: </span>
+            <div role="group" class="btn-group">
+                <button *ngFor="let preset of typingBehaviorPresets; trackBy: trackPresets"
+                        type="button"
+                        class="btn"
+                        [class.btn-default]="!preset.selected"
+                        [class.btn-primary]="preset.selected"
+                        (click)="onLoadPreset(preset.name)"
+                >
+                    {{ preset.name }}
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row gap-3 gap-lg-0">
+    <div class="col-12 col-lg-6">
         <table class="table settings">
             <tbody>
             <tr>
                 <td colspan="2">
-                    <div class="d-flex align-items-center">
-                        <h3>Secondary roles</h3>
-                        <circle-tooltip class="mt-2 ms-1"
-                                        [tooltip]="secondaryRolesTooltip"
-                                        width="380"/>
-                        <ng-template #secondaryRolesTooltip>
-                            <p>Secondary role keys, also dual-role keys, are keys that act depending on context.</p>
-                            For instance, a key may act as an escape key when tapped alone, but act as a mouse layer switcher when used with another key (which is then executed in the mouse layer).
-                        </ng-template>
-                    </div>
+                    <h5 class="fw-bold d-inline-block">Dual role key</h5>
+                    <circle-tooltip tooltip="Secondary role settings that relate to the key that has a dual-role assigned to it."
+                                    [width]="250"/>
                 </td>
             </tr>
             <tr class="separator">
-                <td>Resolution strategy
-                    <circle-tooltip [tooltip]="resolutionStrategyTooltip"
-                                    width="380"/>
-                    <ng-template #resolutionStrategyTooltip>
-                        <p>Simple resolution strategy activates the secondary role whenever there is another keypress while the dual-role key is pressed. If there is no such press, it briefly activates the primary role on the release of the dual-role key.</p>
-                        Advanced strategy allows for more complex activation conditions, in order to allow using secondary roles on alphanumeric keys, as Simple strategy tends to interfere with writing.
-                    </ng-template>
+                <td>Minimum hold time
+                    <circle-tooltip tooltip="The minimum time that a dual-role key must be held before it is allowed to trigger as secondary role."
+                                    [width]="250"/>
                 </td>
                 <td>
-                    <div class="form-check">
-                        <input class="form-check-input" type="radio"
-                               id="secondaryRoleResolutionStrategySimple" name="secondaryRoleResolutionStrategy"
-                               [checked]="secondaryRoleStrategy === SecondaryRoleStrategy.Simple"
-                               (click)="onSetPropertyValue('secondaryRoleStrategy', SecondaryRoleStrategy.Simple)"
-                        >
-                        <label class="form-check-label" for="secondaryRoleResolutionStrategySimple">
-                            Simple
-                        </label>
-                    </div>
-                    <div class="form-check">
-                        <input class="form-check-input" type="radio"
-                               id="secondaryRoleResolutionStrategyAdvanced" name="secondaryRoleResolutionStrategy"
-                               [checked]="secondaryRoleStrategy === SecondaryRoleStrategy.Advanced"
-                               (click)="onSetPropertyValue('secondaryRoleStrategy', SecondaryRoleStrategy.Advanced)"
-                        >
-                        <label class="form-check-label" for="secondaryRoleResolutionStrategyAdvanced">
-                            Advanced
-                        </label>
-                    </div>
+                    <slider-wrapper
+                        [min]="0"
+                        [max]="255"
+                        [step]="5"
+                        valueUnit="ms"
+                        [ngModel]="secondaryRoleAdvancedStrategyMinimumHoldTime"
+                        (ngModelChange)="onSetPropertyValue('secondaryRoleAdvancedStrategyMinimumHoldTime', $event)"
+                    />
                 </td>
             </tr>
             <tr class="separator">
                 <td>Timeout
-                    <circle-tooltip tooltip="If an (advanced strategy) dual-role key is held for at least this amount of time, the Timeout Action is activated even when there is no other activity."
-                                    width="250"/>
+                    <circle-tooltip tooltip="If an dual-role key is held for at least this amount of time, the Timeout Action is activated even when there is no other activity."
+                                    [width]="250"/>
                 </td>
                 <td>
                     <slider-wrapper
-                        [disabled]="secondaryRoleStrategy === SecondaryRoleStrategy.Simple"
                         [min]="50"
                         [max]="1000"
                         [step]="5"
                         valueUnit="ms"
-                        [(ngModel)]="secondaryRoleAdvancedStrategyTimeout"
+                        [ngModel]="secondaryRoleAdvancedStrategyTimeout"
                         (ngModelChange)="onSetPropertyValue('secondaryRoleAdvancedStrategyTimeout', $event)"
                     />
                 </td>
             </tr>
             <tr class="separator">
                 <td>Timeout action
-                    <circle-tooltip tooltip="Dual-role key role to be activated when the timeout is reached."
-                                    width="250"/>
-                </td>
-                <td>
-                    <div class="form-check">
-                        <input class="form-check-input" type="radio"
-                               id="secondaryRoleTimeoutActionPrimary" name="secondaryRoleTimeoutAction"
-                               [checked]="secondaryRoleAdvancedStrategyTimeoutAction === SecondaryRoleAdvancedStrategyTimeoutAction.Primary"
-                               [disabled]="secondaryRoleStrategy === SecondaryRoleStrategy.Simple"
-                               (click)="onSetPropertyValue('secondaryRoleAdvancedStrategyTimeoutAction', SecondaryRoleAdvancedStrategyTimeoutAction.Primary)"
-                        >
-                        <label class="form-check-label" for="secondaryRoleTimeoutActionPrimary">
-                            Primary
-                        </label>
-                    </div>
-                    <div class="form-check">
-                        <input class="form-check-input" type="radio"
-                               id="secondaryRoleTimeoutActionSecondary" name="secondaryRoleTimeoutAction"
-                               [checked]="secondaryRoleAdvancedStrategyTimeoutAction === SecondaryRoleAdvancedStrategyTimeoutAction.Secondary"
-                               [disabled]="secondaryRoleStrategy === SecondaryRoleStrategy.Simple"
-                               (click)="onSetPropertyValue('secondaryRoleAdvancedStrategyTimeoutAction', SecondaryRoleAdvancedStrategyTimeoutAction.Secondary)"
-                        >
-                        <label class="form-check-label" for="secondaryRoleTimeoutActionSecondary">
-                            Secondary
-                        </label>
-                    </div>
-                </td>
-            </tr>
-            <tr class="separator">
-                <td>Trigger by release
-                    <circle-tooltip tooltip="When checked, dual-role key is also activated when another key is released while the dual role-key is pressed. Thus the role is determined by the release order of the two keys."
-                                    width="250"/>
-                </td>
-                <td>
-                    <input type="checkbox"
-                           [disabled]="secondaryRoleStrategy === SecondaryRoleStrategy.Simple"
-                           [(ngModel)]="secondaryRoleAdvancedStrategyTriggerByRelease"
-                           (ngModelChange)="onSetPropertyValue('secondaryRoleAdvancedStrategyTriggerByRelease', $event)"
-                           class="form-check-input">
-                </td>
-            </tr>
-            <tr class="separator">
-                <td>Trigger safety margin
-                    <circle-tooltip [tooltip]="triggerSafetyMarginTooltip"
-                                    width="380"/>
-                    <ng-template #triggerSafetyMarginTooltip>
-                        <p>This virtually offsets the release time of the dual-role key. Thus positive values fine-tune the dual role resolution sensitivity towards the primary role, while negative values fine-tune the dual role resolution sensitivity towards the secondary role.</p>
-                        Intended to be used with the Trigger by release option.
+                    <circle-tooltip [tooltip]="timeoutTypeTooltip"
+                                    [width]="380"/>
+                    <ng-template #timeoutTypeTooltip>
+                        <p>Assume timeout leads to Primary or None:</p>
+                        <p>Active: timeout action is applied immediately when timeout is reached. Secondary role can no longer be activated after timeout was reached.</p>
+                        Passive: timeout action is delayed until release. Secondary role can still be triggered until key release.
                     </ng-template>
                 </td>
                 <td>
-                    <slider-wrapper
-                        [disabled]="secondaryRoleStrategy === SecondaryRoleStrategy.Simple"
-                        [min]="-100"
-                        [max]="100"
-                        [step]="1"
-                        valueUnit="ms"
-                        [(ngModel)]="secondaryRoleAdvancedStrategySafetyMargin"
-                        (ngModelChange)="onSetPropertyValue('secondaryRoleAdvancedStrategySafetyMargin', $event)"
-                    />
+                    <div class="timeout-action-container">
+                        <div class="timeout-action-action-container">
+                            <ng-select
+                                [clearable]="false"
+                                [items]="timeoutActionActionDropdownOptions"
+                                [ngModel]="secondaryRoleAdvancedStrategyTimeoutAction"
+                                (ngModelChange)="onSetPropertyValue('secondaryRoleAdvancedStrategyTimeoutAction', $event)"
+                                bindLabel="text"
+                                bindValue="id"
+                            />
+                        </div>
+
+                        <span>
+                            activated
+                        </span>
+
+                        <div class="timeout-action-type-container">
+                            <ng-select
+                                [clearable]="false"
+                                [items]="timeoutActionTypeDropdownOptions"
+                                [ngModel]="secondaryRoleAdvancedStrategyTimeoutType"
+                                (ngModelChange)="onSetPropertyValue('secondaryRoleAdvancedStrategyTimeoutType', $event)"
+                                bindLabel="text"
+                                bindValue="id"
+                            />
+                        </div>
+                    </div>
                 </td>
             </tr>
             <tr class="separator">
                 <td>Double tap primary
                     <circle-tooltip [tooltip]="doubleTapPrimaryTooltip"
-                                    width="250"/>
+                                    [width]="250"/>
                     <ng-template #doubleTapPrimaryTooltip>
                         <p>If the dual-role key is double-tapped, the primary role is activated.</p>
                         Useful for keys that need to be held, such as space.
@@ -145,29 +126,121 @@
                 </td>
                 <td>
                     <input type="checkbox"
-                           [disabled]="secondaryRoleStrategy === SecondaryRoleStrategy.Simple"
-                           [(ngModel)]="secondaryRoleAdvancedStrategyDoubletapToPrimary"
+                           [ngModel]="secondaryRoleAdvancedStrategyDoubletapToPrimary"
                            (ngModelChange)="onSetPropertyValue('secondaryRoleAdvancedStrategyDoubletapToPrimary', $event)"
                            class="form-check-input">
                 </td>
             </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="col-12 col-lg-6">
+        <table class="table settings">
+            <tbody>
+            <tr>
+                <td colspan="2">
+                    <h5 class="fw-bold d-inline-block">Trigger keys</h5>
+                    <circle-tooltip tooltip="Secondary role settings that relate to the actions that decide the dual-role key behavior. Usually the first key that is pressed after the dual-role key has been pressed."
+                                    [width]="250"/>
+                </td>
+            </tr>
             <tr class="separator">
-                <td>Double tap timeout
-                    <circle-tooltip tooltip="Configures double tap time behavior for the secondary roles."
-                                    width="250"/>
+                <td>Trigger safety margin
+                    <circle-tooltip [tooltip]="triggerSafetyMarginTooltip"
+                                    [width]="380"/>
+                    <ng-template #triggerSafetyMarginTooltip>
+                        <p>This virtually offsets the release time of the dual-role key. Thus positive values fine-tune the dual-role resolution sensitivity towards the primary role, while negative values fine-tune the dual-role resolution sensitivity towards the secondary role.</p>
+                        Intended to be used with the Trigger by release option.
+                    </ng-template>
                 </td>
                 <td>
                     <slider-wrapper
-                        [disabled]="secondaryRoleStrategy === SecondaryRoleStrategy.Simple"
-                        [min]="50"
-                        [max]="1000"
-                        [step]="5"
+                        [min]="-100"
+                        [max]="100"
+                        [step]="1"
                         valueUnit="ms"
-                        [(ngModel)]="secondaryRoleAdvancedStrategyDoubletapTimeout"
-                        (ngModelChange)="onSetPropertyValue('secondaryRoleAdvancedStrategyDoubletapTimeout', $event)"
+                        [ngModel]="secondaryRoleAdvancedStrategySafetyMargin"
+                        (ngModelChange)="onSetPropertyValue('secondaryRoleAdvancedStrategySafetyMargin', $event)"
                     />
                 </td>
             </tr>
+            <tr class="separator">
+                <td>Trigger by
+                    <circle-tooltip [tooltip]="triggeringEventTooltip"
+                                    [width]="350"/>
+                    <ng-template #triggeringEventTooltip>
+                        <p>Press: just as with simple strategy, secondary role activated immediately when another key is pressed.</p>
+                        <p>Release: secondary role is activated when another key is released while the dual-role key is pressed. Thus the role is determined by the release order of the two keys.</p>
+                        None: secondary role key is triggered only by timeout.
+                    </ng-template>
+                </td>
+                <td>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio"
+                               id="secondaryRoleAdvancedStrategyTriggerPress" name="secondaryRoleAdvancedStrategyTrigger"
+                               [checked]="secondaryRoleAdvancedStrategyTrigger === SecondaryRoleAdvancedStrategyTriggeringEvent.Press"
+                               (click)="onSetPropertyValue('secondaryRoleAdvancedStrategyTrigger', SecondaryRoleAdvancedStrategyTriggeringEvent.Press)"
+                        >
+                        <label class="form-check-label" for="secondaryRoleAdvancedStrategyTriggerPress">
+                            Press
+                        </label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio"
+                               id="secondaryRoleAdvancedStrategyTriggerRelease" name="secondaryRoleAdvancedStrategyTrigger"
+                               [checked]="secondaryRoleAdvancedStrategyTrigger === SecondaryRoleAdvancedStrategyTriggeringEvent.Release"
+                               (click)="onSetPropertyValue('secondaryRoleAdvancedStrategyTrigger', SecondaryRoleAdvancedStrategyTriggeringEvent.Release)"
+                        >
+                        <label class="form-check-label" for="secondaryRoleAdvancedStrategyTriggerRelease">
+                            Release
+                        </label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio"
+                               id="secondaryRoleAdvancedStrategyTriggerNone" name="secondaryRoleAdvancedStrategyTrigger"
+                               [checked]="secondaryRoleAdvancedStrategyTrigger === SecondaryRoleAdvancedStrategyTriggeringEvent.None"
+                               (click)="onSetPropertyValue('secondaryRoleAdvancedStrategyTrigger', SecondaryRoleAdvancedStrategyTriggeringEvent.None)"
+                        >
+                        <label class="form-check-label" for="secondaryRoleAdvancedStrategyTriggerNone">
+                            None
+                        </label>
+                    </div>
+                </td>
+            </tr>
+            <tr class="separator">
+                <td>Refuse triggers from same half
+                    <circle-tooltip tooltip="When checked, same half keys don't trigger currently pressed secondary role keys."
+                                    [width]="250"/>
+                </td>
+                <td>
+                    <input type="checkbox"
+                           [ngModel]="secondaryRoleAdvancedStrategyTriggerFromSameHalf"
+                           (ngModelChange)="onSetPropertyValue('secondaryRoleAdvancedStrategyTriggerFromSameHalf', $event)"
+                           class="form-check-input">
+                </td>
+            </tr>
+            <tr class="separator">
+                <td>Trigger by mouse
+                    <circle-tooltip tooltip="When checked, secondary role (usually a modifier in this context) is immediately activated by any mouse movement."
+                                    [width]="250"/>
+                </td>
+                <td>
+                    <input type="checkbox"
+                           [ngModel]="secondaryRoleAdvancedStrategyTriggerByMouse"
+                           (ngModelChange)="onSetPropertyValue('secondaryRoleAdvancedStrategyTriggerByMouse', $event)"
+                           class="form-check-input">
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12 col-lg-6">
+        <table class="table settings">
+            <tbody>
 
             <tr>
                 <td colspan="2">
@@ -175,9 +248,9 @@
                 </td>
             </tr>
             <tr class="separator">
-                <td>Double tap to lock layer timeout
-                    <circle-tooltip tooltip="Double tap to lock layer timeout configures doubletap timeout for layer switchers, and also for the `ifDoubletap` macro condition."
-                                    width="250"/>
+                <td>Double tap timeout
+                    <circle-tooltip tooltip="Configures the timeout for most doubletap behaviors in the firmware. (Layer switcher doubletaps, secondary role doubletaps, the `ifDoubletap` macro condition...)"
+                                    [width]="250"/>
                 </td>
                 <td>
                     <slider-wrapper
@@ -185,7 +258,7 @@
                         [max]="1000"
                         [step]="5"
                         valueUnit="ms"
-                        [(ngModel)]="doubletapTimeout"
+                        [ngModel]="doubletapTimeout"
                         (ngModelChange)="onSetPropertyValue('doubletapTimeout', $event)"
                     />
                 </td>
@@ -193,7 +266,7 @@
             <tr class="separator">
                 <td>Keystroke delay
                     <circle-tooltip [tooltip]="keyStrokeDelayTooltip"
-                                    width="380"/>
+                                    [width]="380"/>
                     <ng-template #keyStrokeDelayTooltip>
                         <p>Minimum delay between two consecutive USB reports. Thus, it's possible to slow down keyboard output in case of fast bursts (for example, from the macro engine).</p>
                         This improves compatibility as many programs (especially RDP clients) have problems accepting too fast input. On the flip side, this limits caret navigation mode sensitivity and introduces (possibly undesired) delays.
@@ -205,7 +278,7 @@
                         [max]="50"
                         [step]="1"
                         valueUnit="ms"
-                        [(ngModel)]="keystrokeDelay"
+                        [ngModel]="keystrokeDelay"
                         (ngModelChange)="onSetPropertyValue('keystrokeDelay', $event)"
                     />
                 </td>

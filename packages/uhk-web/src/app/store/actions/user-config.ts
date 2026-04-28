@@ -37,6 +37,7 @@ export enum ActionTypes {
     SetUserConfigurationRgbValue = '[user-config] Set user configuration RGB value',
     SetUserConfigurationValue = '[user-config] Set user configuration value',
     LoadUserConfigurationFromFile = '[user-config] Load user configuration from file',
+    LoadTypingBehaviorPreset = '[user-config] Load typing behavior preset',
     ApplyUserConfigurationFromFile = '[user-config] Apply user configuration from file',
     PreviewUserConfiguration = '[user-config] Preview user configuration',
     RecoverLEDSpaces = '[user-config] recover LED spaces',
@@ -197,6 +198,13 @@ export class LoadUserConfigurationFromFileAction implements Action {
     }
 }
 
+export class LoadTypingBehaviorPresetAction implements Action {
+    type = ActionTypes.LoadTypingBehaviorPreset;
+
+    constructor(public payload: string) {
+    }
+}
+
 export class ApplyUserConfigurationFromFileAction implements Action {
     type = ActionTypes.ApplyUserConfigurationFromFile;
 
@@ -239,6 +247,7 @@ export type Actions
     | SetUserConfigurationValueAction
     | ToggleColorFromBacklightingColorPaletteAction
     | LoadUserConfigurationFromFileAction
+    | LoadTypingBehaviorPresetAction
     | ApplyUserConfigurationFromFileAction
     | RecoverLEDSpacesAction
     | UserConfigurationNewerAction
