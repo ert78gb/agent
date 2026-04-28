@@ -6,6 +6,13 @@ The format is loosely based on [Keep a Changelog](http://keepachangelog.com/en/1
 
 Every Agent version includes the most recent firmware version. See the [firmware changelog](https://github.com/UltimateHackingKeyboard/firmware/blob/master/CHANGELOG.md).
 
+## [10.0.0] - 2026-04-28
+
+Firmware: 17.0.0 [[release](https://github.com/UltimateHackingKeyboard/firmware/releases/tag/v17.0.0)] | Device Protocol: 4.17.0 | User Config: 14.0.0 | Hardware Config: 1.0.0
+
+- Rework the Typing Behavior page in order to suppoort new firmware features. `USERCONFIG:MAJOR`
+- Reassing "Save layout svg" action to Ctrl+Shift+S.
+
 ## [9.0.1] - 2026-01-26
 
 Firmware: 16.1.1 [[release](https://github.com/UltimateHackingKeyboard/firmware/releases/tag/v16.1.1)] | Device Protocol: 4.17.0 | User Config: 13.0.0 | Hardware Config: 1.0.0
